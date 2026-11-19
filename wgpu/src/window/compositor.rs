@@ -165,12 +165,9 @@ impl Compositor {
             ..limits
         });
 
-        // Request SHADER_F16 only if the adapter supports it (e.g., not available in WebGL2)
-        let required_features = if adapter.features().contains(wgpu::Features::SHADER_F16) {
-            wgpu::Features::SHADER_F16
-        } else {
-            wgpu::Features::empty()
-        };
+        // Request the optional features only where the adapter has them
+        // (e.g., SHADER_F16 is not available in WebGL2)
+        let required_features = adapter.features() & crate::OPTIONAL_FEATURES;
 
         let mut errors = Vec::new();
 

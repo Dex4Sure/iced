@@ -54,6 +54,19 @@ pub use iced_graphics::core;
 pub use wgpu;
 
 pub use engine::Engine;
+
+/// The device features requested whenever the adapter supports them.
+///
+/// Custom [`Primitive`]s can check `device.features()` in their pipeline
+/// to see which of these were granted.
+///
+/// - [`wgpu::Features::SHADER_F16`]
+/// - [`wgpu::Features::TEXTURE_COMPRESSION_BC`]: block-compressed textures
+/// - [`wgpu::Features::TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES`]: e.g.
+///   multisample counts other than 1 and 4
+pub const OPTIONAL_FEATURES: wgpu::Features = wgpu::Features::SHADER_F16
+    .union(wgpu::Features::TEXTURE_COMPRESSION_BC)
+    .union(wgpu::Features::TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES);
 pub use layer::Layer;
 pub use primitive::Primitive;
 
@@ -914,7 +927,7 @@ impl renderer::Headless for Renderer {
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 label: Some("iced_wgpu [headless]"),
-                required_features: wgpu::Features::empty(),
+                required_features: adapter.features() & OPTIONAL_FEATURES,
                 required_limits: wgpu::Limits {
                     max_bind_groups: 2,
                     ..wgpu::Limits::default()
